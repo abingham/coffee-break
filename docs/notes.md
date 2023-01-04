@@ -22,3 +22,11 @@ That is, for a given task plus its inputs and outputs, what were the cache-value
 2. Any cached input values are different from their state now -> an input has changed, forcing a rebuild
 3. Any cached output value is different from their state now -> the output is not in the expected state (perhaps modified externally) and needs to be rebuilt.
 
+# File naming and project root
+
+File nodes construct their cache-id from their path, but currently that path is always relative to...something. We
+need to be more precise about what the path actually is. In e.g. scons there's a notion of a project root, so
+file paths are calculated relative to that based on the sconscript referencing the file. We don't currently have
+a project root notion, so it's not clear how to deal with paths.
+
+Perhaps we can just use absolute paths.
