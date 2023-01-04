@@ -1,13 +1,25 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 
-class Node:
+class Node(ABC):
     def __init__(self):
         self._producer_task = None
 
-    @abstractmethod
+    @property
+    def cache_id(self) -> str:
+        return self._cache_id()
+
+    @property
     def cache_value(self) -> any:
+        return self._cache_value()
+
+    @abstractmethod
+    def _cache_id(self) -> any:
+        pass
+
+    @abstractmethod
+    def _cache_value(self) -> any:
         pass
 
     @property
@@ -30,7 +42,10 @@ class Value(Node):
         super().__init__()
         self.value = value
 
-    def cache_value(self):
+    def _cache_id(self):
+        return str(self.value)
+
+    def _cache_value(self):
         return self.value
 
     def __repr__(self):
@@ -42,7 +57,10 @@ class File(Node):
         super().__init__()
         self.path = Path(path)
 
-    def cache_value(self) -> float:
+    def _cache_id(self) -> str:
+        return str(self.path)
+
+    def _cache_value(self) -> float:
         try:
             return self.path.stat().st_mtime
         except FileNotFoundError:

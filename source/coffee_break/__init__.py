@@ -21,45 +21,51 @@ def build(task, value_db):
             logging.info(f"Running task {build_task!r}")
             build_task.run()
             value_db.set(
-                build_task.id, (_gather_input_cache_values(build_task), _gather_output_cache_values(build_task))
+                build_task.cache_id,
+                {"inputs": _gather_input_cache_values(build_task), "outputs": _gather_output_cache_values(build_task)},
             )
 
 
 def _task_should_run(task, value_db):
-    input_tracking_ids = _gather_input_cache_values(task)
-    assert not any(tracking_id is None for tracking_id in input_tracking_ids)
+    current_cache_value = task.cache_value
 
-    output_tracking_ids = _gather_output_cache_values(task)
-    if any(tracking_id is None for tracking_id in output_tracking_ids):
+    # If any outputs nodes can't provide a cache-value, then the task needs to run
+    output_cache_values = current_cache_value["outputs"]
+    if any(cache_value is None for cache_value in output_cache_values):
         return True
 
+    # If we can't find cached values for the task, then the task needs to run
     try:
-        previous_input_tracking_ids, previous_output_tracking_ids = value_db.get(task.id)
+        previous_input_cache_ids, previous_output_cache_ids = value_db.get(task.cache_id)
     except KeyError:
         return True
 
-    if input_tracking_ids != previous_input_tracking_ids:
+    input_cache_values = current_cache_value["inputs"]
+    assert not any(cache_value is None for cache_value in input_cache_values)
+
+    # If the cached input values don't match the current values, then the task needs to run
+    if input_cache_values != previous_input_cache_ids:
         return True
 
-    if output_tracking_ids != previous_output_tracking_ids:
+    # If the cached output values don't match the current values, then the task needs to run
+    if output_cache_values != previous_output_cache_ids:
         return True
 
     return False
 
 
 def _gather_input_cache_values(task: Task):
-    tracking_ids = []
+    cache_values = []
     for input_node in task.input_nodes:
-        tracking_id = input_node.cache_value()
-        if tracking_id is None:
+        cache_value = input_node.cache_value
+        if cache_value is None:
             raise ValueError(f"Input node with no cache value. {input_node!r}")
-        tracking_ids.append(tracking_id)
-    return tracking_ids
+        cache_values.append(cache_value)
+    return cache_values
 
 
 def _gather_output_cache_values(task: Task):
-    return [node.cache_value() for node in task.output_nodes]
-
+    return [node.cache_value for node in task.output_nodes]
 
 
 def depth_first_search(task):

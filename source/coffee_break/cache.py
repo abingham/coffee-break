@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import shelve
 
 
@@ -14,3 +15,11 @@ class Cache:
     def close(self):
         self._db.close()
 
+
+@contextmanager
+def use_cache(db_path):
+    cache = Cache(db_path)
+    try:
+        yield cache
+    finally:
+        cache.close()
