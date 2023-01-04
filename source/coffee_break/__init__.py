@@ -36,9 +36,12 @@ def _task_should_run(task, value_db):
 
     # If we can't find cached values for the task, then the task needs to run
     try:
-        previous_input_cache_ids, previous_output_cache_ids = value_db.get(task.cache_id)
+        previous_cache_ids = value_db.get(task.cache_id)
     except KeyError:
         return True
+
+    previous_input_cache_ids = previous_cache_ids['inputs']
+    previous_output_cache_ids = previous_cache_ids['outputs']
 
     input_cache_values = current_cache_value["inputs"]
     assert not any(cache_value is None for cache_value in input_cache_values)
