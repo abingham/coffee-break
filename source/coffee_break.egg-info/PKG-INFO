@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: coffee-break
+Version: 0.0.0
+Summary: Build tree
+Home-page: http://bitbucket.org/sixty-north/coffee-break
+Author: Sixty North AS
+Author-email: austin@sixty-north.com
+License: Proprietary
+Platform: any
+Classifier: Development Status :: 3 - Alpha
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3 :: Only
+Provides-Extra: dev
+Provides-Extra: test
+License-File: LICENSE
+
+coffee_break
+
+Build tree
